@@ -7,9 +7,9 @@ from torchvision import datasets, transforms
 import torchvision.models as models
 import argparse
 
-import functions
+import helper
 
-ap = argparse.ArgumentParser(description='Train.py')
+parser = argparse.ArgumentParser(description='Train.py')
 
 
 parser.add_argument('data_dir', action="store", default="./flowers/")
@@ -29,16 +29,16 @@ path = exe.save_dir
 lr = exe.learning_rate
 structure = exe.arch
 dropout = exe.dropout
-hidden_layer1 = exe.hidden_units
-device = exe.gpu
+hiddenlayer1 = exe.hidden_units
+power = exe.gpu
 epochs = exe.epochs
 
 def main():
     
-    train_loader, valid_loader, test_loader = functions.dataloaders(location)
-    model, optimizer, criterion = functions.nn_class(structure, hidder_layer1, hidden_layer2, output_layer, dropout, lr, power)
-    functions.model_processing(model, optimizer, criterion, epochs, print_every, train_loader, power)
-    functions.save_checkpoint(model, train_data, path)
+    train_data, valid_data, test_data, train_loader, valid_loader, test_loader = helper.dataloaders(location)
+    model, model.name, model.classifier, criterion, optimizer = helper.nn_class(structure, hiddenlayer1, dropout, lr, power)
+    helper.model_processing(model, train_loader, valid_loader, criterion, optimizer, epochs, 5, power)
+    helper.save_checkpoint(model, train_data, path, hiddenlayer, dropout, lr)
     print("Training Done!")
 
 

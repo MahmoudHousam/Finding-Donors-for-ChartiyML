@@ -11,7 +11,7 @@ import PIL
 from PIL import Image
 import argparse
 
-import functions
+import helper
 
 parser = argparse.ArgumentParser(description='Predict.py')
 
@@ -30,10 +30,10 @@ path= exe.checkpoint
 exe= parser.parse_args()
 
 def main():
-    model= functions.load_checkpoint(path)
+    model= helper.load_checkpoint(path)
     with open('cat_to_name.json', 'r') as json_file:
         cat_to_name = json.load(json_file)
-    probabilities = functions.predict(image_path, model, number_of_outputs, device)
+    probabilities = helper.predict(path_image, model, topk, power, number_of_outputs)
     labels = [cat_to_name[str(index + 1)] for index in np.array(probabilities[1][0])]
     probability = np.array(probabilities[0][0])
     i=0
