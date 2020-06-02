@@ -19,7 +19,7 @@ with open('cat_to_name.json', 'r') as f:
     
 
 #data_transformation
-def dataloaders(location)
+def dataloaders(location):
     data_dir = location
     train_dir = data_dir + '/train'
     valid_dir = data_dir + '/valid'
@@ -42,7 +42,7 @@ def dataloaders(location)
 
     train_data= datasets.ImageFolder(train_dir, transform= data_transforms['train_transforms']),
     valid_data= datasets.ImageFolder(valid_dir, transform= data_transforms['valid_test_transforms']),
-    test_data= datasets.ImageFolder(test_dir, transform= data_transforms['valid_test_transforms'])}
+    test_data= datasets.ImageFolder(test_dir, transform= data_transforms['valid_test_transforms'])
 
     train_loader= torch.utils.data.DataLoader(train_data, batch_size= 64, shuffle= True),
     valid_loader= torch.utils.data.DataLoader(valid_data, batch_size= 64, shuffle= True),
@@ -98,57 +98,54 @@ def nn_class(structure= 'vgg16', hidder_layer1= 512, hidden_layer2= 256, output_
 
 #training model
 def model_processing(model, train_loader, valid_loader, criterion, optimizer, epochs= 12, print_every= 5, power= 'gpu'):
-     steps= 0
-     training_loss= 0
-
+    steps= 0
+    training_loss= 0
     print("-------------------Your data is proccessed-------------------")
     with active_session():
-    for epoch in range(epochs):
-        #train the model
-        for images, labels in train_loader:
-            steps += 1 
-            if torch.cuda.is_available() and power == 'gpu':
-                images, labels= images.to('cuda'), labels.to('cuda') 
-            optimizer.zero_grad() 
-            training_output= model.forward(images)
-            tr_loss= criterion(train_output, labels)
-            tr_loss.backward() 
-            optimizer.step()
-            training_loss += tr_loss.item() 
-            
-            
-            if steps % print_every == 0:
-                validation_loss= 0
-                accuracy= 0
-                model.eval()
-                with torch.no_grad():
-                        #valid the model
-                        for images, labels in valid_loader:
-                            if torch.cuda.is_available() and power= 'gpu':
-                                images, labels= images.to('cuda'), labels.to('cuda')
-                            valid_output= model.forward(images)
-                            valid_loss= criterion(valid_output, labels)
-                            validation_loss += valid_loss.item()
-                            #measure accuracy
-                            ps= torch.exp(valid_output)
-                            top_p, top_class= ps.topk(1, dim=1)
-                            equal= top_class == labels.view(*top_class.shape)
-                            #is it safe and accepted to use .data and .max()
-                            # equal= (labels.data == ps.max(1)[1]) 
-                            accuracy += torch.mean(equal.type(torch.FloatTensor)).item()
+        for epoch in range(epochs):
+            #train the model
+            for images, labels in train_loader:
+                steps += 1 
+                if torch.cuda.is_available() and power == 'gpu':
+                    images, labels= images.to('cuda'), labels.to('cuda') 
+                optimizer.zero_grad() 
+                training_output= model.forward(images)
+                tr_loss= criterion(train_output, labels)
+                tr_loss.backward() 
+                optimizer.step()
+                training_loss += tr_loss.item() 
+
+
+                if steps % print_every == 0:
+                    validation_loss= 0
+                    accuracy= 0
+                    model.eval()
+                    with torch.no_grad():
+                            #valid the model
+                            for images, labels in valid_loader:
+                                if torch.cuda.is_available() and power == 'gpu':
+                                    images, labels= images.to('cuda'), labels.to('cuda')
+                                valid_output= model.forward(images)
+                                valid_loss= criterion(valid_output, labels)
+                                validation_loss += valid_loss.item()
+                                #measure accuracy
+                                ps= torch.exp(valid_output)
+                                top_p, top_class= ps.topk(1, dim=1)
+                                equal= top_class == labels.view(*top_class.shape)
+                                #is it safe and accepted to use .data and .max()
+                                # equal= (labels.data == ps.max(1)[1]) 
+                                accuracy += torch.mean(equal.type(torch.FloatTensor)).item()
                 model.train()
                 print(f"Epoch {epoch+1}/{epochs}.. "
                       f"Train loss: {training_loss/steps:.3f}.. "
                       f"Validation loss: {validation_loss/len(valid_loader):.3f}.."
                       f"Validation accuracy: {accuracy/len(valid_loader):.3f}")
-
-
-#printing last results of training
-print("Training Loss Mean: {}".format(np.mean(training_loss/steps)),
-      "Validation Loss Mean: {}".format(np.mean(validation_loss/len(valid_loader))),
-      "Model Accuracy: {}".format(np.mean(accuracy/len(valid_loader))),
-      "-------------------Model has finished-------------------",
-      "The model needs {} epochs and {} steps to train and valid your data".format(epochs, steps), sep= "\n")
+                
+                print("Training Loss Mean: {}".format(np.mean(training_loss/steps)),
+                      "Validation Loss Mean: {}".format(np.mean(validation_loss/len(valid_loader))),
+                      "Model Accuracy: {}".format(np.mean(accuracy/len(valid_loader))),
+                      "-------------------Model has finished-------------------",
+                      "The model needs {} epochs and {} steps to train and valid your data".format(epochs, steps), sep= "\n")
 
 
 #Testing the model
@@ -166,10 +163,8 @@ def testing_model(model, test_loader, criterion, power= 'gpu'):
             top_p, top_class= ps.topk(1, dim=1)
             equal= top_class == labels.view(*top_class.shape)
             accuracy += torch.mean(equal.type(torch.FloatTensor)).item()
-
-        return accuracy/len(test_loader)
-result = testing_model(model, data_loaders, criterion, power= 'gpu')
-print("Testing model accuracy is: {}".format(result*100))
+            
+            print(f"Validation accuracy: {accuracy/len(test_loader):.3f}")
 
 
 #saving the model trained
@@ -213,7 +208,7 @@ def process_image(image):
                              [0.229, 0.224, 0.225])
     ])
     pic_trnasform= transform(pic)
-    # pic_to_array= np.array(pic_trnasform)
+    pic_to_array= np.array(pic_trnasform)
     return pic_trnasform
 
 
@@ -221,13 +216,13 @@ def process_image(image):
 def predict(image_path, model, topk=5, power= 'gpu'):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
-    pic=_torch process_image(image_path)
-    # pic_to_tensor= torch.from_numpy(pic).type(torch.FloatTensor)
-    pic_torch= pic_torch.unsqueeze_(0)
+    pic=process_image(image_path)
+    pic= torch.from_numpy(pic).type(torch.FloatTensor)
+    pic= pic.unsqueeze_(0)
     load_model= load_checkpoint(model)
     if torch.cuda.is_available() and device =='gpu':
         load_model.to('cuda')
-        pic_torch= pic_torch.to('cuda')
+        pic= pic.to('cuda')
         
     load_model.eval()
     
